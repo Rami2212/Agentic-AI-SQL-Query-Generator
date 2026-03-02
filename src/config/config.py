@@ -12,20 +12,21 @@ def _req(name: str) -> str:
 
 @dataclass(frozen=True)
 class Settings:
-    # MySQL
+    APP_URL: str
+
     MYSQL_HOST: str
     MYSQL_DATABASE: str
     MYSQL_USER: str
     MYSQL_PASSWORD: str
     MYSQL_PORT: str
 
-    # OpenAI
     AICC_API_KEY: str
     AICC_BASE_URL: str
     AI_MODEL: str
 
 def get_settings() -> Settings:
     return Settings(
+        APP_URL=_req("APP_URL"),
         MYSQL_HOST=_req("MYSQL_HOST"),
         MYSQL_DATABASE=_req("MYSQL_DB"),
         MYSQL_USER=_req("MYSQL_USER"),
@@ -33,5 +34,5 @@ def get_settings() -> Settings:
         MYSQL_PORT=os.getenv("MYSQL_PORT", "3306"),
         AICC_API_KEY=_req("AICC_API_KEY"),
         AICC_BASE_URL=_req("AICC_BASE_URL"),
-        AI_MODEL=os.getenv("AI_MODEL")
+        AI_MODEL=_req("AI_MODEL")
     )

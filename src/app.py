@@ -7,7 +7,7 @@ app = FastAPI()
 class QueryRequest(BaseModel):
     query: str
 
-@app.post("/generate-sql")
+@app.post("/generate-sql/")
 async def generate_sql(request: QueryRequest):
     """Generate SQL query from natural language model."""
     sql_query = generate_sql_query(request.query)

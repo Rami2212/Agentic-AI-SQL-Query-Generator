@@ -1,8 +1,8 @@
-import os
 from sqlalchemy import create_engine, text
-from ..config.config import Settings
+from core.config import get_settings
 
-connection_string = f"mysql+mysqlconnector://{Settings.MYSQL_USER}:{Settings.MYSQL_PASSWORD}@{Settings.MYSQL_HOST}:{Settings.MYSQL_PORT}/{Settings.MYSQL_DB}"
+settings = get_settings()
+connection_string = f"mysql+mysqlconnector://{settings.MYSQL_USER}:{settings.MYSQL_PASSWORD}@{settings.MYSQL_HOST}:{settings.MYSQL_PORT}/{settings.MYSQL_DATABASE}"
 
 engine = create_engine(connection_string, echo=True)
 
@@ -21,7 +21,7 @@ def get_schema():
     WHERE TABLE_SCHEMA = :database;
     """
     with engine.connect() as connection:
-        result = connection.execute(text(query), {"database": MYSQL_DB})
+        result = connection.execute(text(query), {"database": settings.MYSQL_DATABASE})
         schema_info = result.fetchall()
 
         schema_dict = {}

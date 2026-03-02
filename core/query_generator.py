@@ -3,8 +3,8 @@ import openai
 import sqlparse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from ..connectors.database import engine, get_schema
-from ..config.config import Settings
+from core.database import engine, get_schema
+from core.config import Settings
 
 
 def clean_sql_output(response_text):

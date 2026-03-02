@@ -28,7 +28,7 @@ def get_settings() -> Settings:
     return Settings(
         APP_URL=_req("APP_URL"),
         MYSQL_HOST=_req("MYSQL_HOST"),
-        MYSQL_DATABASE=_req("MYSQL_DB"),
+        MYSQL_DATABASE=_req("MYSQL_DATABASE"),
         MYSQL_USER=_req("MYSQL_USER"),
         MYSQL_PASSWORD=_req("MYSQL_PASSWORD"),
         MYSQL_PORT=os.getenv("MYSQL_PORT", "3306"),

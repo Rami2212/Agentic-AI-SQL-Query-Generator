@@ -1,16 +1,8 @@
 import os
 from sqlalchemy import create_engine, text
-from dotenv import load_dotenv
+from ..config.config import Settings
 
-load_dotenv()
-
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_PORT = os.getenv("MYSQL_PORT", "3306")
-MYSQL_DB = os.getenv("MYSQL_DB")
-
-connection_string = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
+connection_string = f"mysql+mysqlconnector://{Settings.MYSQL_USER}:{Settings.MYSQL_PASSWORD}@{Settings.MYSQL_HOST}:{Settings.MYSQL_PORT}/{Settings.MYSQL_DB}"
 
 engine = create_engine(connection_string, echo=True)
 

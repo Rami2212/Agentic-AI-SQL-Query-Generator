@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 def _req(name: str) -> str:
     val = os.getenv(name)
     if not val:

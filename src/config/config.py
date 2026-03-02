@@ -22,6 +22,7 @@ class Settings:
     # OpenAI
     AICC_API_KEY: str
     AICC_BASE_URL: str
+    AI_MODEL: str
 
 def get_settings() -> Settings:
     return Settings(
@@ -31,5 +32,6 @@ def get_settings() -> Settings:
         MYSQL_PASSWORD=_req("MYSQL_PASSWORD"),
         MYSQL_PORT=os.getenv("MYSQL_PORT", "3306"),
         AICC_API_KEY=_req("AICC_API_KEY"),
-        AICC_BASE_URL=_req("AICC_BASE_URL")
+        AICC_BASE_URL=_req("AICC_BASE_URL"),
+        AI_MODEL=os.getenv("AI_MODEL")
     )

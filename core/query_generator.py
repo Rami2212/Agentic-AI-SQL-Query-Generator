@@ -1,11 +1,12 @@
 import re
-import openai
 import sqlparse
+from openai import OpenAI
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from core.database import engine, get_schema
-from core.config import Settings
+from core.config import get_settings
 
+Settings = get_settings()
 
 def clean_sql_output(response_text):
     """Removes markdown formatting and exracts the raw SQL query."""
@@ -30,9 +31,9 @@ def generate_sql_query(nl_input):
     schema = get_schema()
 
     schema_text = "\n".join([
-        f"{table}: {', '.join(columns)}"
-        for table, columns in schema.items()]
-    )
+        f"{table}: {', '.join(f'{col[0]} {col[1]}' for col in columns)}"
+        for table, columns in schema.items()
+    ])
 
     prompt = f"""
     You are an expert SQL generator. Convert the following natural language request into an optimized SQL query. 
@@ -52,17 +53,19 @@ def generate_sql_query(nl_input):
     """
 
     try:
-        response = openai.chat.completions.create(
-            model=Settings.OPENAI_MODEL,
+        client = OpenAI(
+            api_key=Settings.AICC_API_KEY,
+            base_url=Settings.AICC_BASE_URL
+        )
+
+        response = client.chat.completions.create(
+            model=Settings.AI_MODEL,
             messages=[
                 {"role": "system", "content": "You are an expert SQL generator."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=150,
-            temperature=0.2,
         )
         raw_sql_query = response.choices[0].message.content.strip()
-
         sql_query = clean_sql_output(raw_sql_query)
         return sql_query
     except Exception as e:
@@ -87,7 +90,7 @@ def suggest_indexes(sql_query):
         return f"Error generating execution plan: {e}"
 
 def execute_query(sql_query):
-    """Executes the SQL query"""
+    """Executes the SQL query and returns results as list of dicts."""
     is_valid, error_msg = validate_sql_query(sql_query)
     if not is_valid:
         print(f"SQL validation error: {error_msg}")
@@ -96,7 +99,11 @@ def execute_query(sql_query):
     try:
         with engine.connect() as connection:
             result = connection.execute(text(sql_query))
-            fetched_results = result.fetchall()
+
+            if result.returns_rows:
+                fetched_results = [dict(row._mapping) for row in result.fetchall()]
+            else:
+                fetched_results = [{"rowcount": result.rowcount}]
 
         index_suggestions = suggest_indexes(sql_query)
 

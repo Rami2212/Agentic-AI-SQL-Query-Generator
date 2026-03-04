@@ -22,6 +22,7 @@ A full-stack application that converts natural language into optimized SQL queri
 .
 ├── app.py                  # FastAPI application and route definitions
 ├── ui.py                   # Streamlit frontend
+├── docker-compose.yml      # MySQL database service
 ├── core/
 │   ├── config.py           # Settings loaded from environment variables
 │   ├── database.py         # SQLAlchemy engine, connection, and schema introspection
@@ -34,7 +35,7 @@ A full-stack application that converts natural language into optimized SQL queri
 ## Prerequisites
 
 - Python 3.9+
-- A running MySQL instance
+- Docker & Docker Compose
 - An OpenAI-compatible API key and base URL (e.g. OpenAI, Azure OpenAI, or a compatible local model)
 
 ---
@@ -79,9 +80,66 @@ AI_MODEL=model_name
 
 ---
 
+## Database Setup (Docker Compose)
+
+A `docker-compose.yml` is included to spin up a MySQL instance locally — no manual MySQL installation required.
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sql_generator_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
+```
+
+Start the database:
+
+```bash
+docker compose up -d
+```
+
+Stop the database:
+
+```bash
+docker compose down
+```
+
+Stop and remove all data:
+
+```bash
+docker compose down -v
+```
+
+> The compose file reads `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_PORT` directly from your `.env` file, so no duplication is needed.
+
+---
+
 ## Running the Application
 
-### 1. Start the FastAPI backend
+### 1. Start the MySQL database
+
+```bash
+docker compose up -d
+```
+
+### 2. Start the FastAPI backend
 
 ```bash
 python app.py
@@ -92,7 +150,7 @@ uvicorn app:app --host 127.0.0.1 --port 8000 --reload
 The API will be available at `http://127.0.0.1:8000`.  
 Interactive docs: `http://127.0.0.1:8000/docs`
 
-### 2. Start the Streamlit UI
+### 3. Start the Streamlit UI
 
 ```bash
 streamlit run ui.py
